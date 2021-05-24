@@ -101,6 +101,7 @@ func PostContainers(cli *client.Client, ctx context.Context) {
 	//}
 	data := map[string]interface{}{
 		"ID":        dockerInfo.ID,
+		"Name":      dockerInfo.Name,
 		"conainers": containers,
 	}
 	PostData("/dockerMgrApi/containers", data)
