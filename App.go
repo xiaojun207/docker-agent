@@ -16,7 +16,7 @@ func main() {
 	flag.StringVar(&utils.Token, "Token", "12345678", "token")
 	flag.Parse()
 
-	log.Println("Start docker agent")
+	log.Println("Start docker agent, AppId:", utils.AppId)
 	log.Println("utils.DockerServer:", utils.DockerServer)
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

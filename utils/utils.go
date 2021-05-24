@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/go-basic/uuid"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 var DockerServer = "http://localhost:8080"
 var Token = "12345678"
+var AppId = uuid.New()
 
 func PostData(uri string, v interface{}) {
 	url := DockerServer + uri
@@ -28,6 +30,7 @@ func PostData(uri string, v interface{}) {
 	}
 	request.Header.Set("Content-Type", "application/json;charset=UTF-8")
 	request.Header.Set("authorization", Token)
+	request.Header.Set("AppId", AppId)
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
@@ -53,6 +56,7 @@ func GetData(uri string) {
 	}
 	request.Header.Set("Content-Type", "application/json;charset=UTF-8")
 	request.Header.Set("authorization", Token)
+	request.Header.Set("AppId", AppId)
 	client := http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
