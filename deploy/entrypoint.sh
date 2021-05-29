@@ -1,4 +1,4 @@
 #!/bin/sh
 #by xiaojun
 
-/app/App -DockerServer $DockerServer -Token $Token
+/app/App -DockerServer $DockerServer -DockerWsServer $DockerWsServer -Token $Token
