@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
+	"math"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -29,6 +30,7 @@ type WsConfig struct {
 	IsDump                         bool
 	readDeadLineTime               time.Duration
 	reconnectInterval              time.Duration
+	MaxRetry                       int
 }
 
 var dialer = &websocket.Dialer{
@@ -58,6 +60,7 @@ func NewWsBuilder() *WsBuilder {
 	return &WsBuilder{&WsConfig{
 		ReqHeaders:        make(map[string][]string, 1),
 		reconnectInterval: time.Second * 10,
+		MaxRetry:          math.MaxInt32,
 	}}
 }
 
@@ -175,10 +178,10 @@ func (ws *WsConn) connect() error {
 
 	wsConn, resp, err := dialer.Dial(ws.WsUrl, header)
 	if err != nil {
-		log.Printf("[ws][%s] %s", ws.WsUrl, err.Error())
+		log.Printf("[ws][%s] connect err: %s", ws.WsUrl, err.Error())
 		if ws.IsDump && resp != nil {
 			dumpData, _ := httputil.DumpResponse(resp, true)
-			log.Printf("[ws][%s] %s", ws.WsUrl, string(dumpData))
+			log.Printf("[ws][%s] connect dump err: %s", ws.WsUrl, string(dumpData))
 		}
 		return err
 	}
@@ -187,7 +190,7 @@ func (ws *WsConn) connect() error {
 
 	if ws.IsDump {
 		dumpData, _ := httputil.DumpResponse(resp, true)
-		log.Printf("[ws][%s] %s", ws.WsUrl, string(dumpData))
+		log.Printf("[ws][%s] connect dump2 err %s", ws.WsUrl, string(dumpData))
 	}
 	log.Printf("[ws][%s] connected", ws.WsUrl)
 	ws.c = wsConn
@@ -200,18 +203,19 @@ func (ws *WsConn) reconnect() {
 
 	ws.c.Close() //主动关闭一次
 	var err error
-	for retry := 1; retry <= 100; retry++ {
+	for retry := 1; retry <= ws.MaxRetry; retry++ {
 		err = ws.connect()
 		if err != nil {
-			log.Printf("[ws] [%s] websocket reconnect fail , %s", ws.WsUrl, err.Error())
+			log.Printf("[ws] [%s] websocket reconnect(%d) fail , %s", ws.WsUrl, retry, err.Error())
 		} else {
 			break
 		}
 		time.Sleep(ws.WsConfig.reconnectInterval * time.Duration(retry))
+		time.Sleep(time.Second * 5)
 	}
 
 	if err != nil {
-		log.Printf("[ws] [%s] retry connect 100 count fail , begin exiting. ", ws.WsUrl)
+		log.Printf("[ws] [%s] retry connect %d count fail , begin exiting. ", ws.MaxRetry, ws.WsUrl)
 		ws.CloseWs()
 		if ws.ErrorHandleFunc != nil {
 			ws.ErrorHandleFunc(errors.New("retry reconnect fail"))
@@ -265,8 +269,8 @@ func (ws *WsConn) writeRequest() {
 		}
 
 		if err != nil {
-			log.Printf("[ws][%s] write message %s", ws.WsUrl, err.Error())
-			//time.Sleep(time.Second)
+			log.Printf("[ws][%s] writeRequest err, write message1: %s", ws.WsUrl, err.Error())
+			time.Sleep(time.Second * 5)
 		}
 	}
 }
