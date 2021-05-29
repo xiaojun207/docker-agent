@@ -17,7 +17,8 @@ func main() {
 	flag.Parse()
 
 	log.Println("Start docker agent, AppId:", conf.AppId)
-	log.Println("utils.DockerServer:", conf.DockerServer)
+	log.Println("conf.DockerServer:", conf.DockerServer)
+	log.Println("conf.DockerWsServer:", conf.DockerWsServer)
 
 	if conf.DockerServer == "" && conf.DockerWsServer == "" {
 		log.Panic("DockerServer and DockerWsServer, must one of not empty")
