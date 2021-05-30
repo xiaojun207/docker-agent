@@ -13,9 +13,12 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestFindContainer(t *testing.T) {
+	log.Println(time.Now().UnixNano() / 1e6)
+
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
