@@ -4,6 +4,7 @@ import (
 	"docker-agent/service/agent"
 	"docker-agent/service/conf"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 )
@@ -11,6 +12,11 @@ import (
 //https://docs.docker.com/engine/api/sdk/examples/
 
 func main() {
+	fmt.Println("Start Params:")
+	fmt.Println("\tDockerServer\trequired\thttp server address，like：http://127.0.0.1:8080/dockerApi")
+	fmt.Println("\tDockerWsServer\trequired\twebsocket server address，like：http://127.0.0.1:8080/dockerApi/ws")
+	fmt.Println("\tToken\t\tOptional\tThe http and websocket header authorization for dockerserver auth")
+
 	flag.StringVar(&conf.DockerServer, "DockerServer", "http://127.0.0.1:8080/dockerApi", "DockerServer服务地址，如：http://127.0.0.1:8080/dockerApi")
 	flag.StringVar(&conf.DockerWsServer, "DockerWsServer", "", "DockerWsServer服务地址，如：http://127.0.0.1:8068/dockerApi/ws")
 	flag.StringVar(&conf.Token, "Token", "", "The http and websocket header authorization for dockerserver auth")

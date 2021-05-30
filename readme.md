@@ -17,8 +17,8 @@ or
 - Token: The http and websocket header authorization for dockerserver auth;
 
 ### DockerServer, application/json, must support api：
-- /reg  recive agent post docker info data;
-- /containers  recive agent post all container list data;
+- POST /reg,  recive agent post docker info data;
+- POST /containers,  recive agent post all container list data;
 
 ### DockerWsServer, the web socket server：
 the message like this:
