@@ -1,6 +1,9 @@
 package agent
 
-import "log"
+import (
+	"docker-agent/utils"
+	"log"
+)
 
 func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interface{}) {
 	switch ch {
@@ -16,7 +19,7 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 	case "docker.container.restart":
 		containerId := data["containerId"].(string)
 		err := ContainerRestart(containerId)
-		log.Println("ws: " + ch + " containerId:" + containerId)
+		log.Println("ws: "+ch+" containerId:"+containerId+", err:", err)
 		PostContainers()
 		return err, map[string]interface{}{"containerId": containerId}
 	case "docker.container.stop":
@@ -38,25 +41,29 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		PostContainers()
 		return err, map[string]interface{}{"containerId": containerId}
 	case "docker.container.create":
-		id := data["id"].(string)
+		taskId := data["taskId"].(string)
 		imageName := data["imageName"].(string)
 		containerName := data["containerName"].(string)
-		hostPort := data["hostPort"].(string)
-		appPort := data["appPort"].(string)
-		containerId, err := ContainerCreate(imageName, containerName, hostPort, appPort)
-		log.Println("ws: docker.container.run id:" + id)
+		ports := utils.MapInterfaceToString(data["ports"].(map[string]interface{}))
+		env := utils.ArrInterfaceToStr(data["env"].([]interface{}))
+		volumes := utils.ArrInterfaceToStr(data["volumes"].([]interface{}))
+
+		containerId, err := ContainerCreate(imageName, containerName, ports, env, volumes)
+		log.Println("ws: docker.container.run taskId:" + taskId)
 		PostContainers()
-		return err, map[string]interface{}{"id": id, "containerId": containerId}
+		return err, map[string]interface{}{"taskId": taskId, "containerId": containerId}
 	case "docker.container.run":
-		id := data["id"].(string)
+		taskId := data["taskId"].(string)
 		imageName := data["imageName"].(string)
 		containerName := data["containerName"].(string)
-		hostPort := data["hostPort"].(string)
-		appPort := data["appPort"].(string)
-		err := RunContainer(imageName, containerName, hostPort, appPort)
-		log.Println("ws: docker.container.run id:" + id)
+		ports := utils.MapInterfaceToString(data["ports"].(map[string]interface{}))
+		env := utils.ArrInterfaceToStr(data["env"].([]interface{}))
+		volumes := utils.ArrInterfaceToStr(data["volumes"].([]interface{}))
+
+		err, containerId := RunContainer(imageName, containerName, ports, env, volumes)
+		log.Println("ws: docker.container.run taskId:" + taskId)
 		PostContainers()
-		return err, map[string]interface{}{"id": id}
+		return err, map[string]interface{}{"containerId": containerId}
 	case "docker.container.stats":
 		containerId := data["containerId"].(string)
 		stats, err := ContainerStats(containerId)

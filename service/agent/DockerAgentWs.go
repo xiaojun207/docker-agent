@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -73,6 +74,20 @@ func wsMsgHandle(msg []byte) error {
 		data = datamap["d"].(map[string]interface{})
 	}
 	err, resp := MsgHandle(ch, data)
-	SendWsMsg(ch+".ack", map[string]interface{}{"err": err, "resp": resp})
+
+	respCh := "base.ack"
+	if strings.HasPrefix(ch, "docker.") {
+		respCh = "docker.task.ack"
+	}
+
+	taskId := data["taskId"]
+	code := "100200"
+	errMsg := ""
+	if err != nil {
+		code = "100100"
+		errMsg = err.Error()
+	}
+	SendWsMsg(respCh, map[string]interface{}{"code": code, "msg": errMsg, "taskId": taskId, "resp": resp})
+
 	return err
 }

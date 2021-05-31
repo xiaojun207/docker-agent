@@ -15,26 +15,39 @@ import (
 	"time"
 )
 
-//Run a container in the background
-func ContainerCreate(imageName, containerName string, hostPort, appPort string) (string, error) {
-	var openPort = nat.Port(appPort)
+func PortsToSet(ports map[string]string) (nat.PortSet, nat.PortMap) {
+	ExposedPorts := nat.PortSet{}
+	PortBindings := nat.PortMap{}
 
+	for hostPort, appPort := range ports {
+		var openPort = nat.Port(appPort)
+		ExposedPorts[openPort] = struct{}{}
+		PortBindings[openPort] = []nat.PortBinding{
+			{
+				HostIP:   "0.0.0.0",
+				HostPort: hostPort,
+			},
+		}
+	}
+	return ExposedPorts, PortBindings
+}
+
+//Run a container in the background
+func ContainerCreate(imageName, containerName string, ports map[string]string, env []string, volumes []string) (string, error) {
+	exposedPorts, portBindings := PortsToSet(ports)
 	config := &container.Config{
-		Image: imageName,
-		ExposedPorts: nat.PortSet{
-			openPort: struct{}{},
-		},
+		Image:        imageName,
+		ExposedPorts: exposedPorts,
+		Env:          env, // []string{"env2=new"}
+		//OnBuild: []string{"start"},
 	}
 
 	hostConfig := &container.HostConfig{
-		PortBindings: nat.PortMap{
-			openPort: []nat.PortBinding{
-				{
-					HostIP:   "0.0.0.0",
-					HostPort: hostPort,
-				},
-			},
+		PortBindings: portBindings,
+		RestartPolicy: container.RestartPolicy{
+			Name: "always",
 		},
+		Binds: volumes, // []string{"/tmp:/tmp"}
 	}
 
 	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
@@ -46,25 +59,28 @@ func ContainerCreate(imageName, containerName string, hostPort, appPort string) 
 }
 
 //Run a container in the background
-func RunContainer(imageName, containerName string, hostPort, appPort string) error {
+func RunContainer(imageName, containerName string, ports map[string]string, env []string, volumes []string) (error, string) {
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
-		panic(err)
+		log.Println("RunContainer.ImagePull.err:", err)
+		return err, ""
 	}
 	io.Copy(os.Stdout, out)
 
 	CleanOldContainer(containerName)
 
-	containerId, err := ContainerCreate(imageName, containerName, hostPort, appPort)
+	containerId, err := ContainerCreate(imageName, containerName, ports, env, volumes)
 	if err != nil {
-		panic(err)
+		log.Println("RunContainer.ContainerCreate.err:", err)
+		return err, ""
 	}
 	if err := cli.ContainerStart(ctx, containerId, types.ContainerStartOptions{}); err != nil {
-		panic(err)
+		log.Println("RunContainer.ContainerStart.err:", err)
+		return err, containerId
 	}
 
 	log.Println("containerId:", containerId)
-	return err
+	return err, containerId
 }
 
 // 根据容器名称，停止并删除容器
