@@ -294,6 +294,7 @@ func ContainerLogFollow(containerId string, out func(timestamps int64, line stri
 		timestamps := t2.UnixNano() / 1e6 // 毫秒级时间戳
 		Follow = out(timestamps, line)
 	}
+	log.Println("LogFollow is close, containerId:", containerId)
 }
 
 func SubString(str string, begin, length int) (substr string) {
