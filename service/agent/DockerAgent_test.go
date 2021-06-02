@@ -16,8 +16,24 @@ import (
 	"time"
 )
 
+func TestTimeName(t *testing.T) {
+	s := "2021-06-02T10:51:12.725599800Z"
+	fmt.Println(time.Now().UnixNano() / 1e6)
+	fmt.Println(time.Now().Format("Mon Jan 2 15:04:05 -0700 MST 2006"))
+	fmt.Println(time.Now().Format("Mon Jan 2 15:04:05 -0700 MST 2006"))
+	t1, err := time.Parse("Mon Jan 2 15:04:05 -0700 MST 2006", "Mon Jan 2 15:04:05 -0700 MST 2006")
+	fmt.Println("t1:", t1)
+	t2, err := time.Parse("2006-01-02T15:04:05.000000000Z", s)
+	fmt.Println("length:", len("2006-01-02T15:04:05.000000000Z"))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(t2)
+	fmt.Println(s)
+}
+
 func TestFindContainer(t *testing.T) {
-	log.Println(time.Now().UnixNano() / 1e6)
 
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

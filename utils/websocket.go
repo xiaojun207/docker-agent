@@ -204,6 +204,7 @@ func (ws *WsConn) reconnect() {
 	ws.c.Close() //主动关闭一次
 	var err error
 	for retry := 1; retry <= ws.MaxRetry; retry++ {
+		log.Printf("[ws] connect retry ", retry)
 		err = ws.connect()
 		if err != nil {
 			log.Printf("[ws] [%s] websocket reconnect(%d) fail , %s", ws.WsUrl, retry, err.Error())
@@ -211,7 +212,7 @@ func (ws *WsConn) reconnect() {
 			break
 		}
 		time.Sleep(ws.WsConfig.reconnectInterval * time.Duration(retry))
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 1)
 	}
 
 	if err != nil {

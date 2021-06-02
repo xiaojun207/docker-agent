@@ -2,6 +2,7 @@ package agent
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"github.com/docker/docker/api/types"
@@ -47,6 +48,9 @@ func ContainerCreate(imageName, containerName string, ports map[string]string, e
 		RestartPolicy: container.RestartPolicy{
 			Name: "always",
 		},
+		//Resources: container.Resources{
+		//	Memory: 1024 * 1024 * 512, // 512M
+		//},
 		Binds: volumes, // []string{"/tmp:/tmp"}
 	}
 
@@ -245,6 +249,51 @@ func ContainerLogs(containerId string, tail, since string) (string, error) {
 		}
 	}
 	return res, nil
+}
+
+func ContainerLogFollow(containerId string, out func(timestamps int64, line string) bool) {
+	i, err := cli.ContainerLogs(ctx, containerId, types.ContainerLogsOptions{
+		ShowStderr: true,
+		ShowStdout: true,
+		Timestamps: true,
+		Follow:     true,
+		Tail:       "40",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	header := make([]byte, 8)
+	Follow := true
+
+	format_layout := "2006-01-02T15:04:05.000000000Z"
+	timeLen := 30 // len(format_layout)
+
+	for Follow {
+		_, err := i.Read(header)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//var w io.Writer
+		//switch header[0] {
+		//case 1:
+		//	w = os.Stdout
+		//default:
+		//	w = os.Stderr
+		//}
+		count := binary.BigEndian.Uint32(header[4:])
+		dat := make([]byte, count)
+		_, err = i.Read(dat)
+		//fmt.Fprint(w, string(dat))
+		//log.Print(string(dat))
+
+		line := string(dat)
+
+		tmp := SubString(line, 0, timeLen)
+		line = SubString(line, timeLen+1, len(line)-timeLen)
+		t2, _ := time.Parse(format_layout, tmp)
+		timestamps := t2.UnixNano() / 1e6 // 毫秒级时间戳
+		Follow = out(timestamps, line)
+	}
 }
 
 func SubString(str string, begin, length int) (substr string) {

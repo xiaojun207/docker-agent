@@ -2,25 +2,24 @@ docker agent ,which is an agent post docker info、container list、container st
 
 ### Quick start：
 ```
-docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8080/dockerApi" -e DockerWsServer="ws://192.168.1.200:8080/dockerApi/ws/" -e Token="12345678" xiaojun207/docker-agent:latest
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8080/dockerApi" -e Token="12345678" xiaojun207/docker-agent:latest
 ```
 
 or
 ```
-/app/App -DockerServer $DockerServer -DockerWsServer $DockerWsServer -Token $Token
+/app/App -DockerServer $DockerServer -Token $Token
 ```
 
 
 ### Env:
 - DockerServer: The http server accept the agent post docker info;
-- DockerWsServer: The websocket server accept the agent post docker info, and push the task to agent, like create and run a new container;
 - Token: The http and websocket header authorization for dockerserver auth;
 
 ### DockerServer, application/json, must support api：
-- POST /reg,  recive agent post docker info data;
-- POST /containers,  recive agent post all container list data;
+- POST {DockerServer}/reg,  recive agent post docker info data;
+- POST {DockerServer}/containers,  recive agent post all container list data;
+- WS {DockerServer}/ws, websocket path, The websocket server accept the agent post docker info, and push the task to agent, like create and run a new container;
 
-### DockerWsServer, the web socket server：
 the message like this:
 ```
 {

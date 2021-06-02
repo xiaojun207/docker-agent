@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"docker-agent/service/conf"
 	"docker-agent/utils"
 	"log"
 )
@@ -69,6 +70,43 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		stats, err := ContainerStats(containerId)
 		log.Println("ws: " + ch + " containerId:" + containerId)
 		return err, map[string]interface{}{"containerId": containerId, "stats": stats}
+	case "docker.container.logs":
+		containerId := data["containerId"].(string)
+		tail := data["tail"].(string)
+		since := data["since"].(string)
+		logs, err := ContainerLogs(containerId, tail, since)
+		log.Println("ws: " + ch + " containerId:" + containerId)
+		return err, map[string]interface{}{"containerId": containerId, "logs": logs}
+	case "docker.container.log.follow.close":
+		containerId := data["containerId"].(string)
+		conf.LogsFollow.Delete(containerId)
+		return nil, map[string]interface{}{"containerId": containerId}
+	case "docker.container.log.follow":
+		containerId := data["containerId"].(string)
+		isFollow, _ := conf.LogsFollow.LoadBool(containerId)
+		if isFollow {
+			log.Println("ws: " + ch + " containerId:" + containerId + ", log is follow")
+			return nil, map[string]interface{}{"containerId": containerId}
+		}
+
+		conf.LogsFollow.Store(containerId, true)
+
+		go ContainerLogFollow(containerId, func(timestamps int64, line string) bool {
+			d := map[string]interface{}{
+				"cId":  containerId,
+				"ts":   timestamps,
+				"line": line,
+			}
+			err := SendWsMsg("docker.container.log.line", d)
+			if err != nil {
+				conf.LogsFollow.Delete(containerId)
+				return false
+			}
+			follow, _ := conf.LogsFollow.LoadBool(containerId)
+			return follow
+		})
+		log.Println("ws: " + ch + " containerId:" + containerId)
+		return nil, map[string]interface{}{"containerId": containerId}
 	default:
 		log.Println("unknown message "+ch, data)
 		return nil, nil

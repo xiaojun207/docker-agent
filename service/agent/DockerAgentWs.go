@@ -16,7 +16,7 @@ type DockerAgentWs struct {
 var wsConn *utils.WsConn
 
 func StartWs() {
-	endpoint := conf.DockerWsServer
+	endpoint := conf.GetDockerWsUrl()
 	wsConn = utils.NewWsBuilder().
 		WsUrl(endpoint).
 		AutoReconnect().
@@ -45,13 +45,13 @@ func exitHandler(c *utils.WsConn) {
 	}
 }
 
-func SendWsMsg(ch string, data interface{}) {
+func SendWsMsg(ch string, data interface{}) error {
 	msg := map[string]interface{}{
 		"ch": ch,
 		"ts": time.Now().UnixNano() / 1e6,
 		"d":  data,
 	}
-	wsConn.SendJsonMessage(msg)
+	return wsConn.SendJsonMessage(msg)
 }
 
 func wsMsgHandle(msg []byte) error {
