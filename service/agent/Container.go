@@ -234,6 +234,7 @@ func ContainerStats(containerId string) (map[string]interface{}, error) {
 	res := make(map[string]interface{})
 	err = json.Unmarshal([]byte(newStr), &res)
 	res["Follow"] = conf.LogsFollow.GetBool(containerId)
+	res["ServerName"] = conf.DockerInfo.Name
 	return res, err
 }
 

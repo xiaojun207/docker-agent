@@ -76,15 +76,7 @@ func PostContainerStats(containerId string) {
 		log.Println("PostContainerStats.err:", err)
 		return
 	}
-
-	data := map[string]interface{}{
-		"ID":          conf.DockerInfo.ID,
-		"Name":        conf.DockerInfo.Name,
-		"ContainerId": containerId,
-		"Stats":       stats,
-		"Time":        time.Now().Unix(),
-	}
-	utils.PostData("/container/stats", data)
+	utils.PostData("/container/stats", stats)
 	log.Println("PostContainerStats size:", len(stats))
 }
 
