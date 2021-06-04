@@ -3,6 +3,7 @@ package main
 import (
 	"docker-agent/service/agent"
 	"docker-agent/service/conf"
+	"docker-agent/utils"
 	"flag"
 	"fmt"
 	"log"
@@ -27,6 +28,7 @@ func main() {
 
 	log.Println("Start docker agent, AppId:", conf.AppId)
 	log.Println("conf.DockerServer:", conf.DockerServer)
+	log.Println("conf.Token:", utils.SubStr(conf.Token, 1, 10)+"*****")
 
 	if conf.DockerServer == "" {
 		log.Panic("DockerServer must be set. like: -DockerServer http://127.0.0.1:8080/dockerApi")
@@ -52,5 +54,5 @@ func work() {
 	//getTask(cli)
 	agent.PostContainers()
 	//StopAllRunningContainers(cli)
-
+	agent.PostContainersStats()
 }

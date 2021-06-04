@@ -70,6 +70,9 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		stats, err := ContainerStats(containerId)
 		log.Println("ws: " + ch + " containerId:" + containerId)
 		return err, map[string]interface{}{"containerId": containerId, "stats": stats}
+	case "docker.containers.stats":
+		PostContainersStats()
+		return nil, map[string]interface{}{}
 	case "docker.container.logs":
 		containerId := data["containerId"].(string)
 		tail := data["tail"].(string)

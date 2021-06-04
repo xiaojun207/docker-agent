@@ -53,6 +53,23 @@ func PostContainers() {
 	log.Println("PostContainers size:", len(containers))
 }
 
+func PostContainersStats() {
+	err, stats := ContainersStats()
+	if err != nil {
+		log.Println("PostContainersStats.err:", err)
+		return
+	}
+
+	data := map[string]interface{}{
+		"ID":    conf.DockerInfo.ID,
+		"Name":  conf.DockerInfo.Name,
+		"Stats": stats,
+		"Time":  time.Now().Unix(),
+	}
+	utils.PostData("/containers/stats", data)
+	log.Println("PostContainersStats size:", len(stats))
+}
+
 func PostContainerStats(containerId string) {
 	stats, err := ContainerStats(containerId)
 	if err != nil {
@@ -68,7 +85,7 @@ func PostContainerStats(containerId string) {
 		"Time":        time.Now().Unix(),
 	}
 	utils.PostData("/container/stats", data)
-	log.Println("PostContainers size:", len(stats))
+	log.Println("PostContainerStats size:", len(stats))
 }
 
 func PostImageList() {

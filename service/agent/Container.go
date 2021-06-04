@@ -2,6 +2,7 @@ package agent
 
 import (
 	"bytes"
+	"docker-agent/service/conf"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -191,6 +192,24 @@ func RmAllRunningContainers() {
 	}
 }
 
+func ContainersStats() (error, []map[string]interface{}) {
+	containers, err := ContainerList()
+	if err != nil {
+		log.Println("ContainersStats.err:", err)
+		return err, nil
+	}
+	res := []map[string]interface{}{}
+	for _, container := range containers {
+		stats, err := ContainerStats(container.ID)
+		if err != nil {
+			log.Println("ContainersStats.err:", err)
+			return err, nil
+		}
+		res = append(res, stats)
+	}
+	return nil, res
+}
+
 func ContainerStats(containerId string) (map[string]interface{}, error) {
 	//通过cli的ContainerStats方法可以获取到 docker stats命令的详细信息，其实是一个容器监控的方法
 	//这个方法返回了容器使用CPU 内存 网络 磁盘等诸多信息
@@ -214,7 +233,7 @@ func ContainerStats(containerId string) (map[string]interface{}, error) {
 	//fmt.Printf(newStr)
 	res := make(map[string]interface{})
 	err = json.Unmarshal([]byte(newStr), &res)
-
+	res["Follow"] = conf.LogsFollow.GetBool(containerId)
 	return res, err
 }
 

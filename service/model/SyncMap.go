@@ -83,6 +83,14 @@ func (e *SyncMap) LoadBool(key interface{}) (bool, bool) {
 	return false, ok
 }
 
+func (e *SyncMap) GetBool(key interface{}) bool {
+	val, ok := e.Load(key)
+	if ok {
+		return val.(bool)
+	}
+	return false
+}
+
 func (e *SyncMap) Size() int {
 	count := 0
 	e.Range(func(key, value interface{}) bool {

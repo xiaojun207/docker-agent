@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -62,6 +63,10 @@ func TestFindContainer(t *testing.T) {
 }
 
 func TestContainerStatus(t *testing.T) {
+
+}
+
+func TestContainerStatus2(t *testing.T) {
 	//获取ctx
 	ctx := context.Background()
 
@@ -97,13 +102,16 @@ func TestContainerStatus(t *testing.T) {
 			OSType string        `json:"ostype"`
 		}
 		*/
-		fmt.Println(containerStats)
-		fmt.Println("containerStats.Body的内容是: ", containerStats.Body)
+		//fmt.Println(containerStats)
+		//fmt.Println("containerStats.Body的内容是: ", containerStats.Body)
 		buf := new(bytes.Buffer)
 		//io.ReadCloser 转换成 Buffer 然后转换成json字符串
 		buf.ReadFrom(containerStats.Body)
 		newStr := buf.String()
+		stats := map[string]interface{}{}
+		json.Unmarshal(buf.Bytes(), &stats)
 		fmt.Printf(newStr)
+		log.Println(stats)
 	}
 }
 
