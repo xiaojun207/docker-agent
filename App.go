@@ -51,8 +51,6 @@ func work() {
 	}()
 	log.Println("-----------------work----------------------------------")
 	agent.PostDockerInfo()
-	//getTask(cli)
 	agent.PostContainers()
-	//StopAllRunningContainers(cli)
 	agent.PostContainersStats()
 }

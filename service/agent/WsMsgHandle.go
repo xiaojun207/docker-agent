@@ -17,6 +17,9 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		err := ImagePull(image)
 		log.Println("ws: " + ch + " image:" + image + " is pull complate")
 		return err, map[string]interface{}{"image": image}
+	case "docker.container.list":
+		PostContainers()
+		return nil, map[string]interface{}{}
 	case "docker.container.restart":
 		containerId := data["containerId"].(string)
 		err := ContainerRestart(containerId)
@@ -83,6 +86,7 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 	case "docker.container.log.follow.close":
 		containerId := data["containerId"].(string)
 		conf.LogsFollow.Delete(containerId)
+		PostContainersStats()
 		return nil, map[string]interface{}{"containerId": containerId}
 	case "docker.container.log.follow":
 		containerId := data["containerId"].(string)
@@ -108,6 +112,7 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 			follow, _ := conf.LogsFollow.LoadBool(containerId)
 			return follow
 		})
+		PostContainersStats()
 		log.Println("ws: " + ch + " containerId:" + containerId)
 		return nil, map[string]interface{}{"containerId": containerId}
 	default:
