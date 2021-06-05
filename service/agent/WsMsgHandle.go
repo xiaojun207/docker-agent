@@ -2,7 +2,8 @@ package agent
 
 import (
 	"docker-agent/service/conf"
-	"docker-agent/utils"
+	"docker-agent/service/dto"
+	utils2 "github.com/xiaojun207/go-base-utils/utils"
 	"log"
 )
 
@@ -46,25 +47,17 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		return err, map[string]interface{}{"containerId": containerId}
 	case "docker.container.create":
 		taskId := data["taskId"].(string)
-		imageName := data["imageName"].(string)
-		containerName := data["containerName"].(string)
-		ports := utils.MapInterfaceToString(data["ports"].(map[string]interface{}))
-		env := utils.ArrInterfaceToStr(data["env"].([]interface{}))
-		volumes := utils.ArrInterfaceToStr(data["volumes"].([]interface{}))
-
-		containerId, err := ContainerCreate(imageName, containerName, ports, env, volumes)
+		conf := dto.ContainerCreateConfig{}
+		utils2.MapToStruct(data, &conf)
+		containerId, err := ContainerCreate(conf)
 		log.Println("ws: docker.container.run taskId:" + taskId)
 		PostContainers()
 		return err, map[string]interface{}{"taskId": taskId, "containerId": containerId}
 	case "docker.container.run":
 		taskId := data["taskId"].(string)
-		imageName := data["imageName"].(string)
-		containerName := data["containerName"].(string)
-		ports := utils.MapInterfaceToString(data["ports"].(map[string]interface{}))
-		env := utils.ArrInterfaceToStr(data["env"].([]interface{}))
-		volumes := utils.ArrInterfaceToStr(data["volumes"].([]interface{}))
-
-		err, containerId := RunContainer(imageName, containerName, ports, env, volumes)
+		conf := dto.ContainerCreateConfig{}
+		utils2.MapToStruct(data, &conf)
+		err, containerId := RunContainer(conf)
 		log.Println("ws: docker.container.run taskId:" + taskId)
 		PostContainers()
 		return err, map[string]interface{}{"containerId": containerId}

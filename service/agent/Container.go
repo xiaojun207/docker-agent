@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"docker-agent/service/conf"
+	"docker-agent/service/dto"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -34,13 +35,16 @@ func PortsToSet(ports map[string]string) (nat.PortSet, nat.PortMap) {
 	return ExposedPorts, PortBindings
 }
 
+/**
+memory := 1024 * 1024 * 512 // 512M
+*/
 //Run a container in the background
-func ContainerCreate(imageName, containerName string, ports map[string]string, env []string, volumes []string) (string, error) {
-	exposedPorts, portBindings := PortsToSet(ports)
+func ContainerCreate(conf dto.ContainerCreateConfig) (string, error) {
+	exposedPorts, portBindings := PortsToSet(conf.Ports)
 	config := &container.Config{
-		Image:        imageName,
+		Image:        conf.ImageName,
 		ExposedPorts: exposedPorts,
-		Env:          env, // []string{"env2=new"}
+		Env:          conf.Env, // []string{"env2=new"}
 		//OnBuild: []string{"start"},
 	}
 
@@ -49,13 +53,20 @@ func ContainerCreate(imageName, containerName string, ports map[string]string, e
 		RestartPolicy: container.RestartPolicy{
 			Name: "always",
 		},
-		//Resources: container.Resources{
-		//	Memory: 1024 * 1024 * 512, // 512M
-		//},
-		Binds: volumes, // []string{"/tmp:/tmp"}
+		Binds: conf.Volumes, // []string{"/tmp:/tmp"}
+	}
+	if conf.LogType != "" {
+		hostConfig.LogConfig.Type = conf.LogType
+		if len(conf.LogConfigMap) > 0 {
+			hostConfig.LogConfig.Config = conf.LogConfigMap
+		}
 	}
 
-	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
+	if conf.Memory > 0 {
+		hostConfig.Resources.Memory = conf.Memory
+	}
+
+	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, conf.ContainerName)
 	if err != nil {
 		log.Println("ContainerCreate.err:", err)
 		return "", err
@@ -64,17 +75,17 @@ func ContainerCreate(imageName, containerName string, ports map[string]string, e
 }
 
 //Run a container in the background
-func RunContainer(imageName, containerName string, ports map[string]string, env []string, volumes []string) (error, string) {
-	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
+func RunContainer(conf dto.ContainerCreateConfig) (error, string) {
+	out, err := cli.ImagePull(ctx, conf.ImageName, types.ImagePullOptions{})
 	if err != nil {
 		log.Println("RunContainer.ImagePull.err:", err)
 		return err, ""
 	}
 	io.Copy(os.Stdout, out)
 
-	CleanOldContainer(containerName)
+	CleanOldContainer(conf.ContainerName)
 
-	containerId, err := ContainerCreate(imageName, containerName, ports, env, volumes)
+	containerId, err := ContainerCreate(conf)
 	if err != nil {
 		log.Println("RunContainer.ContainerCreate.err:", err)
 		return err, ""

@@ -2,16 +2,23 @@ package agent
 
 import (
 	"context"
+	"docker-agent/service/dto"
 	"encoding/binary"
 	"fmt"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/daemon/logger/jsonfilelog"
 	"log"
 	"strconv"
 	"testing"
 )
 
+func TestName(t *testing.T) {
+
+}
+
 func TestContainerLogs(t *testing.T) {
-	containerId := "drone-runner"
+	containerId := "redis6"
 	//logs, err := ContainerLogs(containerId, "100", "2021-05-30T04:07:11Z")
 	//log.Println(err)
 	//fmt.Println(logs)
@@ -59,26 +66,33 @@ func TestContainerLogs2(t *testing.T) {
 }
 
 func TestContainerCreate(t *testing.T) {
-	imageName := "redis:6.0"
-	containerName := "redis6"
+	conf := dto.ContainerCreateConfig{}
+	conf.ImageName = "redis:6.0"
+	conf.ContainerName = "redis6"
 
-	ContainerRemove(containerName)
+	ContainerRemove(conf.ContainerName)
 
-	ports := map[string]string{
+	conf.Ports = map[string]string{
 		"6389": "6379",
 	}
-	env := []string{}
+	conf.Env = []string{}
 
-	volumes := []string{
+	conf.Volumes = []string{
 		"/tmp:/tmp",
 	}
-	resp, err := ContainerCreate(imageName, containerName, ports, env, volumes)
+
+	conf.LogType = jsonfilelog.Name // jsonfilelog.Name, fluentd.Name
+	conf.LogConfigMap = map[string]string{
+		"mode": string(container.LogModeNonBlock),
+	}
+
+	resp, err := ContainerCreate(conf)
 	if err != nil {
 		log.Println("ContainerCreate.err:", err)
 	}
 
 	log.Println(resp)
-	err = ContainerStart(containerName)
+	err = ContainerStart(conf.ContainerName)
 
 	if err != nil {
 		log.Println("ContainerStart.err:", err)

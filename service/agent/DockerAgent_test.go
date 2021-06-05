@@ -133,6 +133,8 @@ func TestRunContainerTest(t *testing.T) {
 		},
 	}
 
+	// -m ${memory} --memory-swap -1
+	// --log-driver fluentd --log-opt fluentd-address=${FluentdHost} --log-opt tag="{{.Name}}"
 	hostConfig := &container.HostConfig{
 		PortBindings: nat.PortMap{
 			openPort: []nat.PortBinding{
@@ -140,6 +142,14 @@ func TestRunContainerTest(t *testing.T) {
 					HostIP:   "0.0.0.0",
 					HostPort: hostPort,
 				},
+			},
+		},
+		LogConfig: container.LogConfig{
+			Type: "fluentd", // jsonfilelog.Name
+			Config: map[string]string{
+				"mode":            string(container.LogModeNonBlock),
+				"fluentd-address": "172.10.1.2:24224",
+				"tag":             "{{.Name}}",
 			},
 		},
 	}
