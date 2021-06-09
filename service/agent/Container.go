@@ -40,7 +40,7 @@ memory := 1024 * 1024 * 512 // 512M
 */
 //Run a container in the background
 func ContainerCreate(conf dto.ContainerCreateConfig) (string, error) {
-	exposedPorts, portBindings := PortsToSet(conf.Ports)
+	exposedPorts, portBindings := conf.PortsToSet()
 	config := &container.Config{
 		Image:        conf.ImageName,
 		ExposedPorts: exposedPorts,
