@@ -31,6 +31,20 @@ func init() {
 	}
 }
 
+func GetAgentConfig() {
+	err, res := utils.GetData("/config")
+	if err != nil {
+		log.Println("GetAgentConfig.err:", err)
+	}
+	config := res["data"].(map[string]interface{})
+	log.Println("GetAgentConfig.res:", res)
+	agentConfig := (config["agentConfig"]).(map[string]interface{})
+
+	conf.TaskFrequency = time.Duration(agentConfig["TaskFrequency"].(float64)) * time.Second
+
+	log.Println("GetAgentConfig.config:", config)
+}
+
 func PostDockerInfo() {
 	log.Println("PostDockerInfo.info:", conf.DockerInfo.Name)
 	utils.PostData("/reg", conf.DockerInfo)

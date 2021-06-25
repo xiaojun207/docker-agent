@@ -13,7 +13,6 @@ import (
 //https://docs.docker.com/engine/api/sdk/examples/
 
 func PrintParamInfo() {
-
 	fmt.Println("Parameter description:")
 	fmt.Println("\tDockerServer\trequired\thttp server address，like：http://127.0.0.1:8080/dockerApi")
 	fmt.Println("\tToken\t\tOptional\tThe http and websocket header authorization for dockerserver auth")
@@ -36,10 +35,10 @@ func main() {
 
 	log.Println("Start connect to DockerWsServer :", conf.GetDockerWsUrl())
 	agent.StartWs()
-
+	agent.GetAgentConfig()
 	for true {
 		go work()
-		time.Sleep(time.Minute * 1)
+		time.Sleep(conf.TaskFrequency)
 	}
 }
 

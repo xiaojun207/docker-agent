@@ -72,9 +72,18 @@ func TestContainerCreate(t *testing.T) {
 
 	ContainerRemove(conf.ContainerName)
 
-	conf.Ports = map[string]string{
-		"6389": "6379",
+	conf.Ports = []struct {
+		IP          string `json:"IP"`
+		PrivatePort string `json:"PrivatePort"`
+		PublicPort  string `json:"PublicPort"`
+		Type        string `json:"Type"`
+	}{
+		{
+			PrivatePort: "6379",
+			PublicPort:  "6379",
+		},
 	}
+
 	conf.Env = []string{}
 
 	conf.Volumes = []string{

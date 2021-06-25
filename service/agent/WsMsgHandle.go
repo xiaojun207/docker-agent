@@ -13,6 +13,9 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		break
 	case "base.ht.pong":
 		break
+	case "base.config.update":
+		GetAgentConfig()
+		return nil, map[string]interface{}{}
 	case "docker.image.pull":
 		image := data["image"].(string)
 		err := ImagePull(image)
