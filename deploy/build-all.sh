@@ -1,4 +1,4 @@
-version='1.0.0'
+version='1.0.5'
 
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-w -s' -o build/docker-agent-linux App.go
 #upx build/docker-agent-linux

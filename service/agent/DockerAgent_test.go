@@ -179,3 +179,11 @@ func TestRunContainerTest(t *testing.T) {
 
 	stdcopy.StdCopy(os.Stdout, os.Stderr, out)
 }
+
+func TestDisk(t *testing.T) {
+	disk, err := cli.DiskUsage(ctx)
+	log.Println(err)
+	log.Println("LayersSize:", disk.LayersSize, float64(disk.LayersSize*1.0)/1024.0/1024.0/1024.0)
+	log.Println("BuilderSize:", disk.BuilderSize, float64(disk.BuilderSize*1.0)/1024.0/1024.0/1024.0)
+
+}

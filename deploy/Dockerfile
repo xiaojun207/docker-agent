@@ -29,7 +29,8 @@ COPY --from=build /go/release/App /app/
 COPY --from=build /go/release/deploy/entrypoint.sh /app/
 
 ENV DockerServer=""\
-    Token="12345678"
+    Username="agent"\
+    Password=""
 
 ENTRYPOINT ["sh", "/app/entrypoint.sh"]
 

@@ -127,7 +127,7 @@ func (b *WsBuilder) Build() *WsConn {
 
 func (ws *WsConn) NewWs() *WsConn {
 	if ws.HeartbeatIntervalTime == 0 {
-		ws.readDeadLineTime = time.Minute
+		ws.readDeadLineTime = time.Hour * 1
 	} else {
 		ws.readDeadLineTime = ws.HeartbeatIntervalTime * 2
 	}
@@ -204,7 +204,7 @@ func (ws *WsConn) reconnect() {
 	ws.c.Close() //主动关闭一次
 	var err error
 	for retry := 1; retry <= ws.MaxRetry; retry++ {
-		log.Printf("[ws] connect retry ", retry)
+		log.Println("[ws] connect retry ", retry)
 		err = ws.connect()
 		if err != nil {
 			log.Printf("[ws] [%s] websocket reconnect(%d) fail , %s", ws.WsUrl, retry, err.Error())
@@ -216,7 +216,7 @@ func (ws *WsConn) reconnect() {
 	}
 
 	if err != nil {
-		log.Printf("[ws] [%s] retry connect %d count fail , begin exiting. ", ws.MaxRetry, ws.WsUrl)
+		log.Printf("[ws] [%d] retry connect %s count fail , begin exiting. ", ws.MaxRetry, ws.WsUrl)
 		ws.CloseWs()
 		if ws.ErrorHandleFunc != nil {
 			ws.ErrorHandleFunc(errors.New("retry reconnect fail"))
@@ -341,6 +341,7 @@ func (ws *WsConn) receiveMessage() {
 			t, msg, err := ws.c.ReadMessage()
 			if err != nil {
 				if ws.IsAutoReconnect {
+					log.Println("receiveMessage.err:", err)
 					log.Printf("[ws][%s] Unexpected Closed , Begin Retry Connect.", ws.WsUrl)
 					ws.reconnect()
 					continue

@@ -6,7 +6,9 @@ import (
 )
 
 var DockerServer = "" //eg.: http://localhost:8080/docker/
-var Token = "12345678"
+var Token = ""
+var Username = "agent"
+var Password = ""
 var AppId = uuid.New()
 
 func GetDockerWsUrl() string {

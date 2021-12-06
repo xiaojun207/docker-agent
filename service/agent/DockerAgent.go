@@ -21,6 +21,8 @@ var cli *client.Client
 
 func init() {
 	var err error
+	//os.Setenv("DOCKER_CERT_PATH", "")
+	//os.Setenv("DOCKER_HOST", "")
 	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)
