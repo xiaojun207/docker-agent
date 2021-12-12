@@ -52,4 +52,6 @@ func work() {
 	agent.PostContainers()
 	log.Println("PostContainersStats")
 	agent.PostContainersStats()
+	log.Println("PostImageList")
+	agent.PostImageList()
 }

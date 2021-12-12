@@ -65,7 +65,8 @@ func PostContainers() {
 		"Name":      conf.DockerInfo.Name,
 		"conainers": containers,
 	}
-	utils.PostData("/containers", data)
+	//utils.PostData("/containers", data)
+	SendWsMsg("docker.container.list", data)
 	log.Println("PostContainers size:", len(containers))
 }
 
@@ -93,6 +94,7 @@ func PostContainerStats(containerId string) {
 		return
 	}
 	utils.PostData("/container/stats", stats)
+	SendWsMsg("docker.container.stats", stats)
 	log.Println("PostContainerStats size:", len(stats))
 }
 
@@ -108,6 +110,7 @@ func PostImageList() {
 		"Name":   conf.DockerInfo.Name,
 		"Images": images,
 	}
-	utils.PostData("/images", data)
+	//utils.PostData("/images", data)
+	SendWsMsg("docker.image.list", data)
 	log.Println("PostImageList size:", len(images))
 }

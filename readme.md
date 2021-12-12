@@ -3,7 +3,7 @@
 docker agent ,which is an agent post docker info、container list、container stats、container logs to server
 
 ### Quick start：
-```
+```shell
 docker pull xiaojun207/docker-agent:latest
 
 docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8068/dockerMgrApi/agent" -e Username="agent" -e Password="12345678" xiaojun207/docker-agent:latest
@@ -17,8 +17,9 @@ or
 
 ### DockerServer(docker-manager)
 docker manager
-```
- docker run -d --name docker-manager -p 8068:8068 -e driveName=mysql -e dataSourceUrl='root:Abc123@(dbhost:3306)/dbname?charset=utf8' xiaojun207/docker-manager:lates
+```shell
+ docker run -d --name docker-manager -p 8068:8068 -v /app/docker-manager/data:/app/data xiaojun207/docker-manager:latest
+
 ```
 
 
@@ -63,7 +64,7 @@ email: xiaojun207@126.com
 docker-agent，它是一个将docker信息、容器列表、容器统计信息、容器日志发布到服务器(docker-manager)的代理.
 
 ### 快速启动：
-```
+```shell
 docker pull xiaojun207/docker-agent:latest
 
 docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8068/dockerMgrApi/agent" -e Username="agent" -e Password="12345678" xiaojun207/docker-agent:latest
@@ -77,8 +78,9 @@ docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -
 
 ### DockerServer(docker-manager)
 服务管理端
-```
- docker run -d --name docker-manager -p 8068:8068 -e driveName=mysql -e dataSourceUrl='root:Abc123@(dbhost:3306)/dbname?charset=utf8' xiaojun207/docker-manager:latest
+```shell
+ docker run -d --name docker-manager -p 8068:8068 -v /app/docker-manager/data:/app/data xiaojun207/docker-manager:latest
+
 ```
 
 ### Parameter Description:
