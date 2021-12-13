@@ -83,7 +83,8 @@ func PostContainersStats() {
 		"Stats": stats,
 		"Time":  time.Now().Unix(),
 	}
-	utils.PostData("/containers/stats", data)
+	//utils.PostData("/containers/stats", data)
+	SendWsMsg("docker.container.stats", data)
 	log.Println("PostContainersStats size:", len(stats))
 }
 
