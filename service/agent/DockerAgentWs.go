@@ -20,7 +20,9 @@ func StartWs() {
 	wsConn = utils.NewWsBuilder().
 		WsUrl(endpoint).
 		AutoReconnect().
+		Dump().
 		ProtoHandleFunc(wsMsgHandle).
+		ErrorHandleFunc(ErrorHandleFunc).
 		ReconnectInterval(time.Millisecond * 5).
 		Build()
 	go exitHandler(wsConn)
@@ -90,4 +92,16 @@ func wsMsgHandle(msg []byte) error {
 	SendWsMsg(respCh, map[string]interface{}{"code": code, "msg": errMsg, "taskId": taskId, "resp": resp})
 
 	return err
+}
+
+func ErrorHandleFunc(err error) {
+	if err != nil {
+		text := err.Error()
+		log.Println("ErrorHandleFunc:", text)
+		r := map[string]interface{}{}
+		json.Unmarshal([]byte(text), &r)
+		if r["code"] == "105101" {
+			utils.Login()
+		}
+	}
 }

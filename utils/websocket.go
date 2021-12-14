@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"sync"
@@ -180,8 +180,10 @@ func (ws *WsConn) connect() error {
 	if err != nil {
 		log.Printf("[ws][%s] connect err: %s", ws.WsUrl, err.Error())
 		if ws.IsDump && resp != nil {
-			dumpData, _ := httputil.DumpResponse(resp, true)
-			log.Printf("[ws][%s] connect dump err: %s", ws.WsUrl, string(dumpData))
+			//dumpData, _ := httputil.DumpResponse(resp, false)
+			body, _ := ioutil.ReadAll(resp.Body)
+			ws.ErrorHandleFunc(errors.New(string(body)))
+			//log.Printf("[ws][%s] connect dump err: %s", ws.WsUrl, string(body))
 		}
 		return err
 	}
@@ -189,8 +191,10 @@ func (ws *WsConn) connect() error {
 	wsConn.SetReadDeadline(time.Now().Add(ws.readDeadLineTime))
 
 	if ws.IsDump {
-		dumpData, _ := httputil.DumpResponse(resp, true)
-		log.Printf("[ws][%s] connect dump2 err %s", ws.WsUrl, string(dumpData))
+		//dumpData, _ := httputil.DumpResponse(resp, false)
+		body, _ := ioutil.ReadAll(resp.Body)
+		ws.ErrorHandleFunc(errors.New(string(body)))
+		//log.Printf("[ws][%s] connect dump2 err %s", ws.WsUrl, string(body))
 	}
 	log.Printf("[ws][%s] connected", ws.WsUrl)
 	ws.c = wsConn
