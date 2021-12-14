@@ -107,3 +107,12 @@ func TestContainerCreate(t *testing.T) {
 		log.Println("ContainerStart.err:", err)
 	}
 }
+
+func TestStats(t *testing.T) {
+	err, res := ContainersStats()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(res)
+}

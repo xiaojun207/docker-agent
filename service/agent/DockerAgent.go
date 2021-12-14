@@ -5,6 +5,7 @@ import (
 	"docker-agent/service/conf"
 	"docker-agent/utils"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"log"
 	"time"
@@ -44,13 +45,43 @@ func GetAgentConfig() {
 
 	conf.TaskFrequency = time.Duration(agentConfig["TaskFrequency"].(float64)) * time.Second
 
-	log.Println("GetAgentConfig.config:", config)
+	log.Println("conf.TaskFrequency:", conf.TaskFrequency)
 }
 
 func PostDockerInfo() {
 	log.Println("PostDockerInfo.info:", conf.DockerInfo.Name)
 	utils.PostData("/reg", conf.DockerInfo)
 	log.Println("PostDockerInfo.post success:", conf.DockerInfo.Name)
+}
+
+func SystemPrune() error {
+	resp, err := cli.ImagesPrune(ctx, filters.NewArgs())
+	if err != nil {
+		return err
+	}
+	log.Println("ImagesPrune ", resp)
+	cache, err := cli.BuildCachePrune(ctx, types.BuildCachePruneOptions{})
+	if err != nil {
+		return err
+	}
+	log.Println("BuildCachePrune", cache)
+	cresp, err := cli.ContainersPrune(ctx, filters.NewArgs())
+	if err != nil {
+		return err
+	}
+	log.Println("ContainersPrune", cresp)
+	nresp, err := cli.NetworksPrune(ctx, filters.NewArgs())
+	if err != nil {
+		return err
+	}
+	log.Println("NetworksPrune", nresp)
+	vresp, err := cli.VolumesPrune(ctx, filters.NewArgs())
+	if err != nil {
+		return err
+	}
+	log.Println("VolumesPrune", vresp)
+
+	return err
 }
 
 func PostContainers() {
@@ -111,6 +142,7 @@ func PostImageList() {
 		"Name":   conf.DockerInfo.Name,
 		"Images": images,
 	}
+
 	//utils.PostData("/images", data)
 	SendWsMsg("docker.image.list", data)
 	log.Println("PostImageList size:", len(images))

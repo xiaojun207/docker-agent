@@ -31,14 +31,14 @@ func ImagePrune() error {
 	return err
 }
 
-func ImageRemove(imageName string) error {
-	items, err := cli.ImageRemove(ctx, imageName, types.ImageRemoveOptions{})
+func ImageRemove(imageId string) error {
+	items, err := cli.ImageRemove(ctx, imageId, types.ImageRemoveOptions{})
 	if err != nil {
 		return err
 	}
-	log.Println("ImageRemove.imageName length ", len(items))
+	log.Println("ImageRemove.imageId length ", len(items))
 	for _, item := range items {
-		log.Println("ImageRemove.imageName:", imageName, item)
+		log.Println("ImageRemove.imageId:", imageId, item)
 	}
 
 	return err

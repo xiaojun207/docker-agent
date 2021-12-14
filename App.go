@@ -37,6 +37,7 @@ func main() {
 	agent.PostDockerInfo()
 	for true {
 		go work()
+		log.Println("time.Sleep", conf.TaskFrequency)
 		time.Sleep(conf.TaskFrequency)
 	}
 }
