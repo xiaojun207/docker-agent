@@ -1,6 +1,6 @@
 module docker-agent
 
-go 1.18
+go 1.17
 
 require (
 	github.com/docker/docker v20.10.6+incompatible
