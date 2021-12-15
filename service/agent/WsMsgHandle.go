@@ -20,17 +20,22 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		image := data["image"].(string)
 		err := ImagePull(image)
 		log.Println("ws: " + ch + " image:" + image + " is pull complate")
+		PostImageList()
 		return err, map[string]interface{}{"image": image}
 	case "docker.image.remove":
 		imageId := data["imageId"].(string)
 		err := ImageRemove(imageId)
-		log.Println("ws: " + ch + " imageId:" + imageId + " is remove complate")
+		log.Println("ws: "+ch+" imageId:"+imageId+" is remove complate, err:", err)
+		PostImageList()
 		return err, map[string]interface{}{"imageId": imageId}
 	case "docker.image.prune":
 		err := ImagePrune()
+		PostImageList()
 		return err, map[string]interface{}{}
 	case "docker.system.prune":
 		err := SystemPrune()
+		PostImageList()
+		PostContainers()
 		return err, map[string]interface{}{}
 	case "docker.container.list":
 		PostContainers()
