@@ -172,6 +172,8 @@ func (ws *WsConn) connect() error {
 
 	header := http.Header(ws.ReqHeaders)
 	header.Set("AppId", conf.AppId)
+	header.Set("HostIp", conf.HostIp)
+	header.Set("PrivateIp", conf.PrivateIp)
 	header.Set("authorization", conf.Token)
 	header.Set("ServerId", conf.DockerInfo.ID)
 	header.Set("ServerName", conf.DockerInfo.Name)

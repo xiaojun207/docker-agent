@@ -32,6 +32,7 @@ func init() {
 	if err != nil {
 		log.Println("DockerInfo.err:", err)
 	}
+	//cli.NetworkList(ctx, types.NetworkListOptions{})
 }
 
 func GetAgentConfig() {

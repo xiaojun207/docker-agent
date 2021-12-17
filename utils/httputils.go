@@ -73,6 +73,8 @@ func request(method, uri string, body io.Reader) (error, map[string]interface{})
 	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
 	req.Header.Set("authorization", conf.Token)
 	req.Header.Set("AppId", conf.AppId)
+	req.Header.Set("HostIp", conf.HostIp)
+	req.Header.Set("PrivateIp", conf.PrivateIp)
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
