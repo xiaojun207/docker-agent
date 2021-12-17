@@ -21,7 +21,7 @@ func main() {
 	log.Println("Start docker agent, AppId:", conf.AppId)
 	log.Println("conf.DockerServer:", conf.DockerServer)
 	log.Println("conf.Username:", conf.Username)
-	log.Println("conf.Password:", utils.SubStr(conf.Password, 0, 10)+"*****")
+	log.Println("conf.Password:", utils.SubStr(conf.Password, 0, 2)+"*****"+utils.SubStr(conf.Password, len(conf.Password)-2, 2))
 
 	if conf.DockerServer == "" {
 		log.Panic("DockerServer must be set. like: -DockerServer http://127.0.0.1:8068/dockerMgrApi/agent")

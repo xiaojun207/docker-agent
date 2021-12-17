@@ -65,16 +65,16 @@ func GetData(uri string) (error, map[string]interface{}) {
 
 func request(method, uri string, body io.Reader) (error, map[string]interface{}) {
 	url := conf.DockerServer + uri
-	request, err := http.NewRequest(method, url, body)
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		log.Println(err.Error())
 		return err, map[string]interface{}{}
 	}
-	request.Header.Set("Content-Type", "application/json;charset=UTF-8")
-	request.Header.Set("authorization", conf.Token)
-	request.Header.Set("AppId", conf.AppId)
+	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	req.Header.Set("authorization", conf.Token)
+	req.Header.Set("AppId", conf.AppId)
 	client := http.Client{}
-	resp, err := client.Do(request)
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err.Error())
 		return err, map[string]interface{}{}
@@ -86,7 +86,7 @@ func request(method, uri string, body io.Reader) (error, map[string]interface{})
 	}
 	//byte数组直接转成string，优化内存
 	res := map[string]interface{}{}
-	json.Unmarshal([]byte(respBytes), &res)
+	json.Unmarshal(respBytes, &res)
 
 	return nil, res
 }
