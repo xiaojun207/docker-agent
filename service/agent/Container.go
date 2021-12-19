@@ -252,6 +252,7 @@ func ContainerStats(containerId string) (map[string]interface{}, error) {
 }
 
 func ContainerLogs(containerId string, tail, since string) (string, error) {
+	log.Println("ContainerLogs.containerId:", containerId)
 	reader, err := cli.ContainerLogs(ctx, containerId, types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
@@ -267,6 +268,7 @@ func ContainerLogs(containerId string, tail, since string) (string, error) {
 		log.Println("ContainerLogs.err:", err)
 		return "", err
 	}
+	log.Println("ContainerLogs:")
 	buf := new(bytes.Buffer)
 	//io.ReadCloser 转换成 Buffer 然后转换成json字符串
 	buf.ReadFrom(reader)
@@ -285,6 +287,7 @@ func ContainerLogs(containerId string, tail, since string) (string, error) {
 }
 
 func ContainerLogFollow(containerId string, out func(timestamps int64, line string) bool) {
+	log.Println("ContainerLogFollow:", containerId)
 	i, err := cli.ContainerLogs(ctx, containerId, types.ContainerLogsOptions{
 		ShowStderr: true,
 		ShowStdout: true,
@@ -304,7 +307,9 @@ func ContainerLogFollow(containerId string, out func(timestamps int64, line stri
 	for Follow {
 		_, err := i.Read(header)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("ContainerLogFollow.err:", err)
+			//log.Fatal(err)
+			return
 		}
 		//var w io.Writer
 		//switch header[0] {
