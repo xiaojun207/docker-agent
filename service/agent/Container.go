@@ -83,7 +83,14 @@ func RunContainer(conf dto.ContainerCreateConfig) (error, string) {
 	}
 	io.Copy(os.Stdout, out)
 
-	CleanOldContainer(conf.ContainerName)
+	contain, err := FindContainer(conf.ContainerName)
+	if err == nil {
+		if conf.Cover {
+			ContainerRemove(contain.ID)
+		} else {
+			return err, ""
+		}
+	}
 
 	containerId, err := ContainerCreate(conf)
 	if err != nil {
@@ -216,6 +223,9 @@ func ContainersStats() (error, []map[string]interface{}) {
 			log.Println("ContainersStats.err:", err)
 			return err, nil
 		}
+		//cpu :=  utils.FormatCpu(stats["cpu_stats"].(map[string]interface{}), stats["precpu_stats"].(map[string]interface{}))
+		//
+		//log.Println("Name:", container.Names, ",cpu:", cpu)
 		res = append(res, stats)
 	}
 	return nil, res

@@ -27,6 +27,7 @@ type ContainerCreateConfig struct {
 	Memory       int64             `json:"memory"`
 	LogType      string            `json:"logType"`
 	LogConfigMap map[string]string `json:"logConfig"`
+	Cover        bool              `json:"cover"`
 }
 
 func (e *ContainerCreateConfig) PortsToSet() (nat.PortSet, nat.PortMap) {
@@ -46,6 +47,10 @@ func (e *ContainerCreateConfig) PortsToSet() (nat.PortSet, nat.PortMap) {
 	return ExposedPorts, PortBindings
 }
 
-func (e ContainerCreateConfig) GetVolumes() []string {
+func (e ContainerCreateConfig) GetVolumes() (res []string) {
+	//for _, v := range e.Volumes {
+	//	tmp := v["Source"].(string) + ":" + v["Destination"].(string) + ":" + utils.If(v["RW"].(bool), "rw", "ro").(string)
+	//	res = append(res, tmp)
+	//}
 	return e.Volumes
 }
