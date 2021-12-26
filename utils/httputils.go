@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 const RSAPublicKey = "-----BEGIN RSA Public Key-----\n" +
@@ -51,7 +52,7 @@ func PostData(uri string, v interface{}) (error, map[string]interface{}) {
 	text := string(bytesData)
 	if has && d == text {
 		log.Println("数据已经提交过，避免重复提交, uri:", uri)
-		return nil, nil
+		//return nil, nil
 	}
 	reader := bytes.NewReader(bytesData)
 	err, resp := request("POST", uri, reader)
@@ -81,14 +82,24 @@ func request(method, uri string, body io.Reader) (error, map[string]interface{})
 		log.Println(err.Error())
 		return err, map[string]interface{}{}
 	}
+
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err.Error())
 		return err, map[string]interface{}{}
 	}
+
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status), map[string]interface{}{
+			"code": strconv.FormatInt(int64(int(resp.StatusCode)), 10),
+			"msg":  string(respBytes),
+		}
+	}
+
 	//byte数组直接转成string，优化内存
 	res := map[string]interface{}{}
-	json.Unmarshal(respBytes, &res)
+	err = json.Unmarshal(respBytes, &res)
+	log.Println(err)
 
 	return nil, res
 }
