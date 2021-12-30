@@ -6,7 +6,7 @@ docker agent ,which is an agent post docker info、container list、container st
 ```shell
 docker pull xiaojun207/docker-agent:latest
 
-docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8068/dockerMgrApi/agent" -e Username="agent" -e Password="12345678" xiaojun207/docker-agent:latest
+docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8068/dockerMgrApi/agent" -e Username="agent" -e Password="12345678" -e HostIp="192.168.1.6" xiaojun207/docker-agent:latest
 
 ```
 
@@ -27,10 +27,11 @@ docker manager
 
 Parameter | required    | default value | description
 ---|-------------|--------------|--- 
-DockerServer | required    | -            | The http server accept the agent post docker info;
-Username | no          | agent        | The username for dockerserver auth, default : agent. You can get the token from DockerServer first start console logs;
-Password | required    | false        | The password of username for dockerserver auth. You can get the token from DockerServer first start console logs;
-Token | Deprecated  | -            | Deprecated, instead by username and password
+DockerServer | required    | -        | The http server accept the agent post docker info;
+Username     | no          | agent    | The username for dockerserver auth, default : agent. You can get the token from DockerServer first start console logs;
+Password     | required    | false    | The password of username for dockerserver auth. You can get the token from DockerServer first start console logs;
+HostIp       | no          | -        | docker host IP
+Token        | Deprecated  | -        | Deprecated, instead by username and password
 
 
 ### Special note
@@ -67,7 +68,7 @@ docker-agent，它是一个将docker信息、容器列表、容器统计信息�
 ```shell
 docker pull xiaojun207/docker-agent:latest
 
-docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8068/dockerMgrApi/agent" -e Username="agent" -e Password="12345678" xiaojun207/docker-agent:latest
+docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -e DockerServer="http://192.168.1.200:8068/dockerMgrApi/agent" -e Username="agent" -e Password="12345678" -e HostIp="192.168.1.6" xiaojun207/docker-agent:latest
 
 ```
 
@@ -87,10 +88,11 @@ docker run -d --name docker-agent -v /var/run/docker.sock:/var/run/docker.sock -
 
 参数 | 是否必填 | 默认值   | 描述
 ---|------|-------|--- 
-DockerServer | 必填   | -     | docker-manager的http地址，用于接收docker-agent提交的docker信息;
-Username | no   | agent | 登录docker-manager用户名. 在docker-manager中获取，角色类型：AGENT;
-Password | 必填   | -     | 登录docker-manager密码
-Token | 已弃用  | -     | 已弃用，请使用username和password替换
+DockerServer | 必填    | -     | docker-manager的http地址，用于接收docker-agent提交的docker信息;
+Username     | no     | agent | 登录docker-manager用户名. 在docker-manager中获取，角色类型：AGENT;
+Password     | 必填    | -     | 登录docker-manager密码
+HostIp       | 非必填  | -     | docker宿主机IP
+Token        | 已弃用  | -     | 已弃用，请使用username和password替换
 
 
 ### 特别说明

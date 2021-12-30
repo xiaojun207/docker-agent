@@ -40,12 +40,15 @@ func main() {
 
 	agent.StartWs()
 	agent.GetAgentConfig()
-	agent.PostDockerInfo()
+
 	for true {
 		go work()
 		log.Println("time.Sleep", conf.TaskFrequency)
+		//time.Sleep(time.Second * 15)
 		time.Sleep(conf.TaskFrequency)
 	}
+
+	select {}
 }
 
 func work() {
@@ -55,6 +58,8 @@ func work() {
 		}
 	}()
 	log.Println("-----------------work----------------------------------")
+	log.Println("PostDockerInfo")
+	agent.PostDockerInfo()
 	log.Println("PostContainers")
 	agent.PostContainers()
 	log.Println("PostContainersStats")

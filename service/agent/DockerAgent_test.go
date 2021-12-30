@@ -13,6 +13,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -185,5 +186,13 @@ func TestDisk(t *testing.T) {
 	log.Println(err)
 	log.Println("LayersSize:", disk.LayersSize, float64(disk.LayersSize*1.0)/1024.0/1024.0/1024.0)
 	log.Println("BuilderSize:", disk.BuilderSize, float64(disk.BuilderSize*1.0)/1024.0/1024.0/1024.0)
+
+}
+
+func TestCompare(t *testing.T) {
+	s1 := "/data/web"
+	s2 := "/usr/local/openresty/extr_lua"
+	i := strings.Compare(s2, s1)
+	log.Println(i)
 
 }

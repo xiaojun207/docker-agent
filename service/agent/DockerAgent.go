@@ -8,6 +8,8 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"log"
+	"reflect"
+	"sort"
 	"time"
 )
 
@@ -19,6 +21,11 @@ type DockerAgent struct {
 
 var ctx = context.Background()
 var cli *client.Client
+
+var lastInfo types.Info
+var lastContainers []types.Container
+var lastContainersStats []map[string]interface{}
+var lastImageList []types.ImageSummary
 
 func init() {
 	var err error
@@ -50,9 +57,31 @@ func GetAgentConfig() {
 }
 
 func PostDockerInfo() {
-	log.Println("PostDockerInfo.info:", conf.DockerInfo.Name)
-	utils.PostData("/reg", conf.DockerInfo)
-	log.Println("PostDockerInfo.post success:", conf.DockerInfo.Name)
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("PostDockerInfo.err:", err)
+		}
+	}()
+
+	var err error
+	conf.DockerInfo, err = cli.Info(ctx)
+	if err != nil {
+		log.Println("DockerInfo.err:", err)
+	}
+	if !reflect.ValueOf(lastInfo).IsZero() {
+		lastInfo.SystemTime = conf.DockerInfo.SystemTime
+	}
+	SendWsMsg("docker.info.systemTime", conf.DockerInfo.SystemTime)
+
+	if !reflect.DeepEqual(lastInfo, conf.DockerInfo) {
+		log.Println("PostDockerInfo.info:", conf.DockerInfo.Name)
+		utils.PostData("/reg", conf.DockerInfo)
+		//SendWsMsg("docker.info", conf.DockerInfo)
+		log.Println("PostDockerInfo.post success:", conf.DockerInfo.Name)
+	} else {
+		log.Println("PostDockerInfo.DeepEqual, ignore it")
+	}
+	lastInfo = conf.DockerInfo
 }
 
 func SystemPrune() error {
@@ -86,38 +115,67 @@ func SystemPrune() error {
 }
 
 func PostContainers() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("PostContainers.err:", err)
+		}
+	}()
 	containers, err := ContainerList()
 	if err != nil {
-		log.Println("PostContainers.err:", err)
+		log.Println("PostContainers.list.err:", err)
 		return
 	}
-
-	data := map[string]interface{}{
-		"ID":        conf.DockerInfo.ID,
-		"Name":      conf.DockerInfo.Name,
-		"conainers": containers,
+	for _, container := range containers {
+		//log.Println("container",i,",Ports:", container.Ports)
+		p := PortSlice{container.Ports}
+		sort.Sort(&p)
+		//log.Println("container",i, ",Arr:", p.Arr)
+		container.Ports = p.Arr
+		m := MountSlice{container.Mounts}
+		sort.Sort(&m)
+		container.Mounts = m.Arr
 	}
-	//utils.PostData("/containers", data)
-	SendWsMsg("docker.container.list", data)
-	log.Println("PostContainers size:", len(containers))
+
+	if !reflect.DeepEqual(lastContainers, containers) {
+		data := map[string]interface{}{
+			"ID":         conf.DockerInfo.ID,
+			"Name":       conf.DockerInfo.Name,
+			"containers": containers,
+		}
+		//utils.PostData("/containers", data)
+		SendWsMsg("docker.container.list", data)
+		log.Println("PostContainers size:", len(containers))
+	} else {
+		log.Println("PostContainers.DeepEqual, ignore it")
+	}
+	lastContainers = containers
 }
 
 func PostContainersStats() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("PostContainersStats.err:", err)
+		}
+	}()
 	err, stats := ContainersStats()
 	if err != nil {
 		log.Println("PostContainersStats.err:", err)
 		return
 	}
-
-	data := map[string]interface{}{
-		"ID":    conf.DockerInfo.ID,
-		"Name":  conf.DockerInfo.Name,
-		"Stats": stats,
-		"Time":  time.Now().Unix(),
+	if !reflect.DeepEqual(stats, lastContainersStats) {
+		data := map[string]interface{}{
+			"ID":    conf.DockerInfo.ID,
+			"Name":  conf.DockerInfo.Name,
+			"Stats": stats,
+			"Time":  time.Now().Unix(),
+		}
+		//utils.PostData("/containers/stats", data)
+		SendWsMsg("docker.container.stats", data)
+		log.Println("PostContainersStats size:", len(stats))
+	} else {
+		log.Println("PostContainersStats.DeepEqual, ignore it")
 	}
-	//utils.PostData("/containers/stats", data)
-	SendWsMsg("docker.container.stats", data)
-	log.Println("PostContainersStats size:", len(stats))
+	lastContainersStats = stats
 }
 
 func PostContainerStats(containerId string) {
@@ -132,19 +190,35 @@ func PostContainerStats(containerId string) {
 }
 
 func PostImageList() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("PostImageList.err:", err)
+		}
+	}()
 	images, err := ImageList()
 	if err != nil {
 		log.Println("PostImageList.err:", err)
 		return
 	}
+	// 排序，确保数据不因顺序不同，而重复提交
+	images = ImageSlice{images}.Sort()
 
-	data := map[string]interface{}{
-		"ID":     conf.DockerInfo.ID,
-		"Name":   conf.DockerInfo.Name,
-		"Images": images,
+	if !reflect.DeepEqual(images, lastImageList) {
+		if !reflect.ValueOf(lastImageList).IsZero() {
+			utils.CompareInter(images, lastImageList)
+		}
+
+		data := map[string]interface{}{
+			"ID":     conf.DockerInfo.ID,
+			"Name":   conf.DockerInfo.Name,
+			"Images": images,
+		}
+
+		//utils.PostData("/images", data)
+		SendWsMsg("docker.image.list", data)
+		log.Println("PostImageList size:", len(images))
+	} else {
+		log.Println("PostImageList.DeepEqual, ignore it")
 	}
-
-	//utils.PostData("/images", data)
-	SendWsMsg("docker.image.list", data)
-	log.Println("PostImageList size:", len(images))
+	lastImageList = images
 }

@@ -43,20 +43,11 @@ func Login() {
 	}
 }
 
-var cacheMap = map[string]string{}
-
 func PostData(uri string, v interface{}) (error, map[string]interface{}) {
 	bytesData, _ := json.Marshal(v)
 	//log.Println(string(bytesData))
-	d, has := cacheMap[uri]
-	text := string(bytesData)
-	if has && d == text {
-		log.Println("数据已经提交过，避免重复提交, uri:", uri)
-		//return nil, nil
-	}
 	reader := bytes.NewReader(bytesData)
 	err, resp := request("POST", uri, reader)
-	cacheMap[uri] = text
 	return err, resp
 }
 
@@ -68,7 +59,7 @@ func request(method, uri string, body io.Reader) (error, map[string]interface{})
 	url := conf.DockerServer + uri
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("request.New.err:", err)
 		return err, map[string]interface{}{}
 	}
 	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
@@ -79,13 +70,13 @@ func request(method, uri string, body io.Reader) (error, map[string]interface{})
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("request.Do.err:", err)
 		return err, map[string]interface{}{}
 	}
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("request.readAll.err:", err)
 		return err, map[string]interface{}{}
 	}
 
@@ -99,7 +90,9 @@ func request(method, uri string, body io.Reader) (error, map[string]interface{})
 	//byte数组直接转成string，优化内存
 	res := map[string]interface{}{}
 	err = json.Unmarshal(respBytes, &res)
-	log.Println(err)
+	if err != nil {
+		log.Println("request.Unmarshal.err:", err)
+	}
 
 	return nil, res
 }
