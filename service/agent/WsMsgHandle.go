@@ -3,6 +3,7 @@ package agent
 import (
 	"docker-agent/service/conf"
 	"docker-agent/service/dto"
+	"docker-agent/service/model"
 	utils2 "github.com/xiaojun207/go-base-utils/utils"
 	"log"
 )
@@ -97,20 +98,38 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 		return err, map[string]interface{}{"containerId": containerId, "logs": logs}
 	case "docker.container.log.follow.close":
 		containerId := data["containerId"].(string)
-		conf.LogsFollow.Delete(containerId)
+		conf.RemoveLogFollow(containerId)
 		PostContainersStats()
 		return nil, map[string]interface{}{"containerId": containerId}
 	case "docker.container.log.follow":
 		containerId := data["containerId"].(string)
-		isFollow, _ := conf.LogsFollow.LoadBool(containerId)
-		if isFollow {
-			log.Println("ws: " + ch + " containerId:" + containerId + ", log is follow")
-			return nil, map[string]interface{}{"containerId": containerId}
+		logFollow(containerId)
+		PostContainersStats()
+		log.Println("ws: " + ch + " containerId:" + containerId)
+		return nil, map[string]interface{}{"containerId": containerId}
+	case "docker.container.exec":
+		containerId := data["cId"].(string)
+		cmd := ""
+		if data["cmd"] != nil {
+			cmd = data["cmd"].(string)
 		}
+		d := ([]byte)(data["d"].(string))
+		dockerExec(containerId, cmd, d)
+		break
+	case "docker.container.exec.close":
+		containerId := data["cId"].(string)
+		conf.RemoveDockerExecStart(containerId)
+		break
+	default:
+		log.Println("unknown message "+ch, data)
+		return nil, nil
+	}
+	return nil, nil
+}
 
-		conf.LogsFollow.Store(containerId, true)
-
-		go ContainerLogFollow(containerId, func(timestamps int64, line string) bool {
+func logFollow(containerId string) {
+	Init := func() model.LogFollow {
+		out := func(timestamps int64, line string) bool {
 			d := map[string]interface{}{
 				"cId":  containerId,
 				"ts":   timestamps,
@@ -118,18 +137,45 @@ func MsgHandle(ch string, data map[string]interface{}) (error, map[string]interf
 			}
 			err := SendWsMsg("docker.container.log.line", d)
 			if err != nil {
-				conf.LogsFollow.Delete(containerId)
+				conf.RemoveLogFollow(containerId)
 				return false
 			}
-			follow, _ := conf.LogsFollow.LoadBool(containerId)
-			return follow
-		})
-		PostContainersStats()
-		log.Println("ws: " + ch + " containerId:" + containerId)
-		return nil, map[string]interface{}{"containerId": containerId}
-	default:
-		log.Println("unknown message "+ch, data)
-		return nil, nil
+			return conf.IsLogFollow(containerId)
+		}
+		go ContainerLogFollow(containerId, out)
+		return model.LogFollow{
+			Id:  containerId,
+			Out: out,
+		}
 	}
-	return nil, nil
+	conf.GetLogFollowStart(containerId, Init)
+}
+
+func dockerExec(containerId, cmd string, d []byte) {
+	Init := func() model.DockerExecStart {
+		in := make(chan []byte)
+		out := func(d []byte) error {
+			msg := map[string]interface{}{
+				"cId": containerId,
+				"d":   string(d),
+			}
+			err := SendWsMsg("docker.container.exec", msg)
+			if err != nil {
+				conf.RemoveDockerExecStart(containerId)
+			}
+			return err
+		}
+
+		go ContainerExec(containerId, cmd, out, in)
+		return model.DockerExecStart{
+			Id:  containerId,
+			In:  in,
+			Out: out,
+		}
+	}
+
+	execModel := conf.GetDockerExecStart(containerId, Init)
+	if d != nil && len(d) > 0 {
+		execModel.In <- d
+	}
 }

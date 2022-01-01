@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"docker-agent/service/conf"
 	"docker-agent/service/dto"
+	"docker-agent/utils"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -254,7 +255,7 @@ func ContainerStats(containerId string) (map[string]interface{}, error) {
 	//fmt.Printf(newStr)
 	res := make(map[string]interface{})
 	err = json.Unmarshal([]byte(newStr), &res)
-	res["Follow"] = conf.LogsFollow.GetBool(containerId)
+	res["Follow"] = conf.IsLogFollow(containerId)
 	res["ServerName"] = conf.DockerInfo.Name
 	res["OSType"] = containerStats.OSType
 
@@ -289,7 +290,7 @@ func ContainerLogs(containerId string, tail, since string) (string, error) {
 		if len(line) < 8 {
 			res += line + "\n"
 		} else {
-			s := SubString(line, 8, len(line)-8)
+			s := utils.SubString(line, 8, len(line)-8)
 			res += s + "\n"
 		}
 	}
@@ -315,7 +316,7 @@ func ContainerLogFollow(containerId string, out func(timestamps int64, line stri
 	timeLen := 30 // len(format_layout)
 
 	for Follow {
-		_, err := i.Read(header)
+		_, err = i.Read(header)
 		if err != nil {
 			log.Println("ContainerLogFollow.err:", err)
 			//log.Fatal(err)
@@ -336,32 +337,11 @@ func ContainerLogFollow(containerId string, out func(timestamps int64, line stri
 
 		line := string(dat)
 
-		tmp := SubString(line, 0, timeLen)
-		line = SubString(line, timeLen+1, len(line)-timeLen)
+		tmp := utils.SubString(line, 0, timeLen)
+		line = utils.SubString(line, timeLen+1, len(line)-timeLen)
 		t2, _ := time.Parse(format_layout, tmp)
 		timestamps := t2.UnixNano() / 1e6 // 毫秒级时间戳
 		Follow = out(timestamps, line)
 	}
 	log.Println("LogFollow is close, containerId:", containerId)
-}
-
-func SubString(str string, begin, length int) (substr string) {
-	// 将字符串的转换成[]rune
-	rs := []rune(str)
-	lth := len(rs)
-
-	// 简单的越界判断
-	if begin < 0 {
-		begin = 0
-	}
-	if begin >= lth {
-		begin = lth
-	}
-	end := begin + length
-	if end > lth {
-		end = lth
-	}
-
-	// 返回子串
-	return string(rs[begin:end])
 }

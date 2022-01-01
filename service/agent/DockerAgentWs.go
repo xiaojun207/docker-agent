@@ -5,6 +5,7 @@ import (
 	"docker-agent/utils"
 	"encoding/json"
 	"log"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -57,6 +58,11 @@ func SendWsMsg(ch string, data interface{}) error {
 }
 
 func wsMsgHandle(msg []byte) error {
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		log.Println("wsMsgHandle.err:", err)
+	//	}
+	//}()
 	datamap := make(map[string]interface{})
 	err := json.Unmarshal(msg, &datamap)
 	if err != nil {
@@ -72,7 +78,8 @@ func wsMsgHandle(msg []byte) error {
 
 	log.Println("recv:" + string(msg))
 	data := map[string]interface{}{}
-	if datamap["d"] != nil {
+
+	if datamap["d"] != nil && reflect.TypeOf(data) == reflect.TypeOf(datamap["d"]) {
 		data = datamap["d"].(map[string]interface{})
 	}
 	err, resp := MsgHandle(ch, data)
@@ -82,19 +89,26 @@ func wsMsgHandle(msg []byte) error {
 		respCh = "docker.task.ack"
 	}
 
-	taskId := data["taskId"]
+	taskId, has := data["taskId"]
 	code := "100200"
 	errMsg := ""
 	if err != nil {
 		code = "100100"
 		errMsg = err.Error()
 	}
-	SendWsMsg(respCh, map[string]interface{}{"code": code, "msg": errMsg, "taskId": taskId, "resp": resp})
+	if has {
+		SendWsMsg(respCh, map[string]interface{}{"code": code, "msg": errMsg, "taskId": taskId, "resp": resp})
+	}
 
 	return err
 }
 
 func ErrorHandleFunc(err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("ErrorHandleFunc.err:", err)
+		}
+	}()
 	if err != nil {
 		text := err.Error()
 		log.Println("ErrorHandleFunc:", text)

@@ -57,7 +57,7 @@ func work() {
 			log.Println("work.err:", err)
 		}
 	}()
-	log.Println("-----------------work----------------------------------")
+	log.Println("-------------------- work ---- ExecMap.size:", conf.ExecMap.Size(), ",LogFollowMap.size:", conf.LogFollowMap.Size(), "-----------------------")
 	log.Println("PostDockerInfo")
 	agent.PostDockerInfo()
 	log.Println("PostContainers")

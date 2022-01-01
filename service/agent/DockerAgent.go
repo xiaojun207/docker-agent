@@ -48,7 +48,7 @@ func GetAgentConfig() {
 		log.Println("GetAgentConfig.err:", err)
 	}
 	config := res["data"].(map[string]interface{})
-	log.Println("GetAgentConfig.res:", res)
+	log.Println("GetAgentConfig.data:", res["data"])
 	agentConfig := (config["agentConfig"]).(map[string]interface{})
 
 	conf.TaskFrequency = time.Duration(agentConfig["TaskFrequency"].(float64)) * time.Second
