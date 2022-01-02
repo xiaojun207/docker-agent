@@ -24,22 +24,21 @@ const RSAPublicKey = "-----BEGIN RSA Public Key-----\n" +
 	"-----END RSA Public Key-----\n"
 
 func Login() {
-	if conf.Token == "" {
-		err, resp := PostData("/login", map[string]string{
-			"username": conf.Username,
-			"password": utils.RSAEncrypt(conf.Password, RSAPublicKey),
-		})
-		if err != nil {
-			log.Println("Login Server err:", err)
-			log.Panic(errors.New("login Server Fail"))
-		}
-		if resp["code"] == "100200" {
-			log.Println("Login Server Success")
-			conf.Token = resp["data"].(string)
-		} else {
-			log.Println("Login Server Fail:", resp)
-			log.Panic(errors.New("login Server Fail"))
-		}
+	log.Println("login...")
+	err, resp := PostData("/login", map[string]string{
+		"username": conf.Username,
+		"password": utils.RSAEncrypt(conf.Password, RSAPublicKey),
+	})
+	if err != nil {
+		log.Println("Login Server err:", err)
+		log.Panic(errors.New("login Server Fail"))
+	}
+	if resp["code"] == "100200" {
+		log.Println("Login Server Success")
+		conf.Token = resp["data"].(string)
+	} else {
+		log.Println("Login Server Fail:", resp)
+		log.Panic(errors.New("login Server Fail"))
 	}
 }
 
