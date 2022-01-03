@@ -75,8 +75,9 @@ func PostDockerInfo() {
 
 	if !reflect.DeepEqual(lastInfo, conf.DockerInfo) {
 		log.Println("PostDockerInfo.info:", conf.DockerInfo.Name)
-		utils.PostData("/reg", conf.DockerInfo)
-		//SendWsMsg("docker.info", conf.DockerInfo)
+		//utils.CompareInter(lastInfo, conf.DockerInfo)
+		//utils.PostData("/reg", conf.DockerInfo)
+		SendWsMsg("docker.info", conf.DockerInfo)
 		log.Println("PostDockerInfo.post success:", conf.DockerInfo.Name)
 	} else {
 		log.Println("PostDockerInfo.DeepEqual, ignore it")

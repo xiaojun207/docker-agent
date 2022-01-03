@@ -40,7 +40,7 @@ func main() {
 
 	agent.StartWs()
 	agent.GetAgentConfig()
-
+	utils.PostData("/reg", conf.DockerInfo)
 	for true {
 		go work()
 		log.Println("time.Sleep", conf.TaskFrequency)
