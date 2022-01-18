@@ -2,6 +2,11 @@
 
 docker agent ,which is an agent post docker info、container list、container stats、container logs to server
 
+### 结构图
+
+![结构图](diagram.png "结构图")
+
+
 ### Quick start：
 ```shell
 docker pull xiaojun207/docker-agent:latest
@@ -63,6 +68,11 @@ email: xiaojun207@126.com
 
 
 docker-agent，它是一个将docker信息、容器列表、容器统计信息、容器日志发布到服务器(docker-manager)的代理.
+
+## 结构图
+
+![结构图](diagram.png "结构图")
+
 
 ### 快速启动：
 ```shell
