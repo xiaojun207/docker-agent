@@ -8,7 +8,7 @@ require (
 	github.com/go-basic/uuid v1.0.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/ricochet2200/go-disk-usage/du v0.0.0-20210707232629-ac9918953285
-	github.com/xiaojun207/go-base-utils v0.1.4
+	github.com/xiaojun207/go-base-utils v0.1.7
 )
 
 require (
