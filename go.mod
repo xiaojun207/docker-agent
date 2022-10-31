@@ -3,7 +3,7 @@ module docker-agent
 go 1.17
 
 require (
-	github.com/docker/docker v20.10.17+incompatible
+	github.com/docker/docker v20.10.21+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/go-basic/uuid v1.0.0
 	github.com/gorilla/websocket v1.5.0
