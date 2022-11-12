@@ -8,7 +8,7 @@ require (
 	github.com/go-basic/uuid v1.0.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/ricochet2200/go-disk-usage/du v0.0.0-20210707232629-ac9918953285
-	github.com/xiaojun207/go-base-utils v0.1.7
+	github.com/xiaojun207/go-base-utils v0.2.6
 )
 
 require (
@@ -22,10 +22,8 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/goinggo/mapstructure v0.0.0-20140717182941-194205d9b4a9 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/go-cmp v0.5.5 // indirect
-	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/moby/term v0.0.0-20200312100748-672ec06f55cd // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
@@ -41,7 +39,5 @@ require (
 	golang.org/x/sys v0.0.0-20210324051608-47abb6519492 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/fsnotify.v1 v1.4.7 // indirect
-	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gotest.tools/v3 v3.0.3 // indirect
 )
