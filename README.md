@@ -4,7 +4,7 @@ docker agent ,which is an agent post docker info、container list、container st
 
 ### 结构图
 
-![结构图](diagram.png "结构图")
+<img alt="结构图" src="docs/img/diagram.png" title="结构图" width="600px"/>
 
 
 ### Quick start：
@@ -71,7 +71,7 @@ docker-agent，它是一个将docker信息、容器列表、容器统计信息�
 
 ## 结构图
 
-![结构图](diagram.png "结构图")
+![结构图](docs/img/diagram.png "结构图")
 
 
 ### 快速启动：
